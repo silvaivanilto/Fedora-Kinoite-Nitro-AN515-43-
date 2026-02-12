@@ -35,13 +35,13 @@ To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
 
 1.  **Rebase to the unsigned image (first step):**
     ```bash
-    rpm-ostree rebase ostree-unverified-registry:ghcr.io/your-username/fedora-kinoite-nitro-an515-43:latest
+    rpm-ostree rebase ostree-unverified-registry:ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest
     systemctl reboot
     ```
 
 2.  **Rebase to the signed image (recommended):**
     ```bash
-    rpm-ostree rebase ostree-image-signed:docker://ghcr.io/your-username/fedora-kinoite-nitro-an515-43:latest
+    rpm-ostree rebase ostree-image-signed:docker://ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest
     systemctl reboot
     ```
 
@@ -50,5 +50,5 @@ To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
 The image is signed with Sigstore/Cosign. To verify the signature locally:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/your-username/fedora-kinoite-nitro-an515-43
+cosign verify --key cosign.pub ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43
 ```
