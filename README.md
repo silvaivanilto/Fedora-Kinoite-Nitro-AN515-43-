@@ -26,7 +26,9 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ### 🧹 Cleanup & Flatpaks
 *   All default Flatpaks from the base image are **removed** during installation.
-*   **Flathub** repository enabled by default.
+*   **Flathub** repository enabled and the following apps installed:
+    *   **Browser:** Google Chrome.
+    *   **KDE Apps:** Okular, Elisa, Haruna, Skanpage, Kalk, Koko, Marknote.
 *   **Fedora Flatpaks** repository disabled.
 
 ## 📁 Project Structure

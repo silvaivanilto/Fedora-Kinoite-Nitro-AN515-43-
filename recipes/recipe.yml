@@ -1,16 +1,11 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/<user>/<name>
 name: fedora-kinoite-nitro-an515-43
-# description will be included in the image's metadata
 description: This is my personal OS image.
 
-# the base image to build on top of (FROM) and the version tag to use
 base-image: ghcr.io/ublue-os/kinoite-nvidia
-image-version: 43 # latest is also supported if you want new updates ASAP
+image-version: 43
 
-# module configuration, executed in order
-# you can include multiple instances of the same module
 modules:
   - type: dnf
     repos:
@@ -19,21 +14,17 @@ modules:
     install:
       packages:
         - plasma-firewall
+        - libreoffice-base
         - libreoffice-calc
-        - libreoffice-core
-        - libreoffice-data
+        - libreoffice-draw
         - libreoffice-emailmerge
         - libreoffice-graphicfilter
         - libreoffice-help-pt-BR
         - libreoffice-impress
         - libreoffice-kf6
         - libreoffice-langpack-pt-BR
-        - libreoffice-ogltrans
-        - libreoffice-opensymbol-fonts
-        - libreoffice-pdfimport
+        - libreoffice-math
         - libreoffice-pyuno
-        - libreoffice-ure
-        - libreoffice-ure-common
         - libreoffice-writer
         - plasma-login-manager
         - kcm-plasmalogin
@@ -60,14 +51,6 @@ modules:
         - Fira Sans
         - Fira Mono
 
-  - type: default-flatpaks
-    notify: false # Do not send notification on first boot
-    system:
-      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
-      repo-name: flathub
-      repo-title: Flathub
-      # install: [org.mozilla.firefox] # Example: Install specific flatpaks here if desired
-
   - type: script
     scripts:
       - remove-flatpaks.sh
@@ -79,9 +62,25 @@ modules:
     install:
       packages:
         - libva-nvidia-driver # From RPM Fusion (setup-repos.sh)
-        - tlp # From TLP Repo (setup-tlp.sh)
+        - tlp
         - tlp-pd
         - tlp-rdw
+
+  - type: default-flatpaks
+    configurations:
+      - repo:
+          url: https://dl.flathub.org/repo/flathub.flatpakrepo
+          name: flathub
+          title: Flathub
+        install:
+          - com.google.Chrome
+          - org.kde.okular
+          - org.kde.elisa
+          - org.kde.haruna
+          - org.kde.skanpage
+          - org.kde.kalk
+          - org.kde.koko
+          - org.kde.marknote
 
   - type: systemd
     system:
@@ -93,4 +92,4 @@ modules:
         - systemd-rfkill.service
         - systemd-rfkill.socket
 
-  - type: signing # this sets up the proper policy & signing files for signed images to work fully
+  - type: signing
