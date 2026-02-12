@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build ISO
-        uses: jasonn3/build-container-installer@v1.2.4
+        uses: jasonn3/build-container-installer@v1.4.0
         id: build
         with:
           image_name: fedora-kinoite-nitro-an515-43
