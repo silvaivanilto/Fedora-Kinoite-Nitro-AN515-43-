@@ -11,6 +11,3 @@ rm -rf /etc/skel/.var   # Remove from new user template
 # Add Flathub
 flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-modify --system --enable flathub
-
-# Disable Fedora (if exists)
-flatpak remote-modify --system --disable fedora || true

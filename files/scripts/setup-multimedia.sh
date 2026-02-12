@@ -7,7 +7,7 @@ rpm-ostree install \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 # Swap ffmpeg-free for full ffmpeg
-rpm-ostree override remove ffmpeg-free --install ffmpeg
+rpm-ostree override remove libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free ffmpeg-free --install ffmpeg
 
 # Update multimedia group (excluding PackageKit plugin to avoid conflicts)
 # Note: In ostree, we install packages directly rather than using groupupdate
