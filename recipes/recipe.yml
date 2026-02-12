@@ -50,12 +50,47 @@ modules:
         - tuned
         - tuned-ppd
 
+  - type: brew
+
+  - type: fonts
+    fonts:
+      nerd-fonts:
+        - NerdFontsSymbolsOnly
+      google-fonts:
+        - Fira Sans
+        - Fira Mono
+
+  - type: default-flatpaks
+    notify: false # Do not send notification on first boot
+    system:
+      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      repo-name: flathub
+      repo-title: Flathub
+      # install: [org.mozilla.firefox] # Example: Install specific flatpaks here if desired
+
   - type: script
     scripts:
-      - enable-plasmalogin.sh
       - remove-flatpaks.sh
-      - setup-multimedia.sh
+      - setup-repos.sh
       - setup-tlp.sh
       - configure-nvidia.sh
+
+  - type: dnf
+    install:
+      packages:
+        - libva-nvidia-driver # From RPM Fusion (setup-repos.sh)
+        - tlp # From TLP Repo (setup-tlp.sh)
+        - tlp-pd
+        - tlp-rdw
+
+  - type: systemd
+    system:
+      enabled:
+        - plasmalogin.service
+        - tlp.service
+        - tlp-pd.service
+      masked:
+        - systemd-rfkill.service
+        - systemd-rfkill.socket
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
