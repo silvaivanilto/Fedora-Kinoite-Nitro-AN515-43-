@@ -1,43 +1,54 @@
-# BlueBuild Template &nbsp; [![bluebuild build badge](https://github.com/blue-build/template/actions/workflows/build.yml/badge.svg)](https://github.com/blue-build/template/actions/workflows/build.yml)
+# Fedora Kinoite Nitro (Acer AN515-43)
 
-See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
+Custom Fedora Kinoite (KDE) image optimized for the Acer Nitro 5 (AN515-43) laptop, based on BlueBuild and Universal Blue.
 
-After setup, it is recommended you update this README to describe your custom image.
+## 🚀 Features
 
-## Installation
+This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and includes the following customizations:
 
-> [!WARNING]  
-> [This is an experimental feature](https://www.fedoraproject.org/wiki/Changes/OstreeNativeContainerStable), try at your own discretion.
+### 🎮 Base & Desktop Environment
+*   **Base:** `ghcr.io/ublue-os/kinoite-nvidia:43` (Fedora 43 Stable - Proprietary Nvidia drivers included).
+*   **KDE Plasma:** Beta Version (`@kdesig/kde-beta` enabled - Optional, keep to test Plasma latest features).
+*   **Login Manager:** **Plasma Login** (`plasmalogin.service`) replaces SDDM for a more integrated and lightweight experience (SDDM removed).
 
-To rebase an existing atomic Fedora installation to the latest build:
+### ⚡ Power Optimizations
+*   **TLP:** Advanced power management configured and enabled by default.
+*   **Removed/Masked Services:** `tuned`, `tuned-ppd`, and `systemd-rfkill` were removed or masked to avoid conflicts with TLP.
 
-- First rebase to the unsigned image, to get the proper signing keys and policies installed:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/blue-build/template:latest
-  ```
-- Reboot to complete the rebase:
-  ```
-  systemctl reboot
-  ```
-- Then rebase to the signed image, like so:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/blue-build/template:latest
-  ```
-- Reboot again to complete the installation
-  ```
-  systemctl reboot
-  ```
+### 📦 Packages & Applications
+*   **Installed:**
+    *   Full **LibreOffice** suite (pt-BR support).
+    *   **Plasma Firewall**.
+*   **Removed (Bloatware/Redundancy):**
+    *   Firefox (RPM) - *Use the Flatpak version from Flathub*.
+    *   `sddm`, `sddm-kcm`, `sddm-wayland-plasma`.
+    *   `plasma-drkonqi`, `kdebugsettings`, `firewall-config`.
 
-The `latest` tag will automatically point to the latest build. That build will still always use the Fedora version specified in `recipe.yml`, so you won't get accidentally updated to the next major version.
+### 🧹 Cleanup & Flatpaks
+*   All default Flatpaks from the base image are **removed** during installation.
+*   **Flathub** repository enabled by default.
+*   **Fedora Flatpaks** repository disabled.
 
-## ISO
+## 📥 Installation
 
-If build on Fedora Atomic, you can generate an offline ISO with the instructions available [here](https://blue-build.org/learn/universal-blue/#fresh-install-from-an-iso). These ISOs cannot unfortunately be distributed on GitHub for free due to large sizes, so for public projects something else has to be used for hosting.
+To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
 
-## Verification
+1.  **Rebase to the unsigned image (first step):**
+    ```bash
+    rpm-ostree rebase ostree-unverified-registry:ghcr.io/your-username/fedora-kinoite-nitro-an515-43-:latest
+    systemctl reboot
+    ```
 
-These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running the following command:
+2.  **Rebase to the signed image (recommended):**
+    ```bash
+    rpm-ostree rebase ostree-image-signed:docker://ghcr.io/your-username/fedora-kinoite-nitro-an515-43-:latest
+    systemctl reboot
+    ```
+
+## 🔐 Verification
+
+The image is signed with Sigstore/Cosign. To verify the signature locally:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/blue-build/template
+cosign verify --key cosign.pub ghcr.io/your-username/fedora-kinoite-nitro-an515-43-
 ```
