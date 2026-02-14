@@ -11,10 +11,15 @@ modules:
     repos:
       copr:
         - "@kdesig/kde-beta"
+        - jhyub/supergfxctl-plasmoid
+        - lukenukem/asus-linux
     install:
       packages:
         # Container Management
         - distrobox
+        # Hybrid Graphics
+        - supergfxctl
+        - supergfxctl-plasmoid
         # KDE Plasma
         - kcm-plasmalogin
         - plasma-discover-rpm-ostree
@@ -110,6 +115,11 @@ modules:
         - Fira Sans
         - Fira Mono
 
+  - type: files
+    files:
+      - source: rpms
+        destination: /tmp/rpms
+
   - type: script
     scripts:
       - upgrade-kde-beta.sh
@@ -148,10 +158,12 @@ modules:
   - type: systemd
     system:
       enabled:
+        - nvidia-powerd.service
         - plasmalogin.service
+        - rpm-ostreed-automatic.timer
+        - supergfxd.service
         - tlp.service
         - tlp-pd.service
-        - rpm-ostreed-automatic.timer
       masked:
         - systemd-rfkill.service
         - systemd-rfkill.socket

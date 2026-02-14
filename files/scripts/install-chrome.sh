@@ -1,7 +1,9 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Add Google Chrome RPM repository
+echo "Installing Google Chrome Stable..."
+
+# 1. Configure Official Repository
 cat > /etc/yum.repos.d/google-chrome.repo << 'EOF'
 [google-chrome]
 name=google-chrome
@@ -11,13 +13,11 @@ gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 EOF
 
-# Import Google's signing key
-rpm --import https://dl.google.com/linux/linux_signing_key.pub
-
-# Install Google Chrome Stable
+# 2. Installation via DNF
 dnf install -y google-chrome-stable
 
-# Set Google Chrome as default browser (system-wide)
+# 3. Configure Chrome as System Default Browser (MIME Types)
+# This ensures links in KDE and other apps open in Chrome by default.
 mkdir -p /etc/xdg
 cat > /etc/xdg/mimeapps.list << 'EOF'
 [Default Applications]
@@ -28,3 +28,5 @@ x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
 application/xhtml+xml=google-chrome.desktop
 EOF
+
+echo "Chrome installation completed successfully."

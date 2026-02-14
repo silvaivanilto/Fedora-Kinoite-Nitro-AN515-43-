@@ -1,8 +1,13 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Install Epson Inkjet Printer Drivers (ESC/P-R) from Fedora 41
-# Packages were orphaned and are not available in Fedora 43
-rpm-ostree install \
-  https://kojipkgs.fedoraproject.org//packages/epson-inkjet-printer-escpr/1.7.21/7.1lsb3.2.fc41/x86_64/epson-inkjet-printer-escpr-1.7.21-7.1lsb3.2.fc41.x86_64.rpm \
-  https://kojipkgs.fedoraproject.org//packages/epson-inkjet-printer-escpr2/1.1.49/6.1lsb3.2.fc41/x86_64/epson-inkjet-printer-escpr2-1.1.49-6.1lsb3.2.fc41.x86_64.rpm
+# Install Epson Inkjet Printer Drivers (ESC/P-R)
+# We use local RPMs to ensure build reproducibility and stability.
+
+echo "Installing Epson printer drivers from local repository..."
+
+# In BlueBuild, files/ are typically available in the build context
+# We use dnf to handle potential local dependencies if any (though lsb is usually the only one)
+dnf install -y /tmp/rpms/epson-inkjet-printer-escpr*.rpm
+
+echo "Epson drivers installed successfully."

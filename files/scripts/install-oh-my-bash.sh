@@ -1,31 +1,39 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Install oh-my-bash to /etc/skel so new users receive it automatically
-# We clone deeply to /etc/skel/.oh-my-bash
+# Configuration
+# Theme choice: 'powerline' requires Powerline/Nerd Fonts (already included in recipe)
+OMB_THEME="powerline"
+OMB_PLUGINS="git bash-completion extract history-substring-search"
+
+echo "Installing Oh My Bash to /etc/skel..."
+
+# 1. Clean and Clone OMB
+# We use a shallow clone to keep the image size small
 if [ -d "/etc/skel/.oh-my-bash" ]; then
     rm -rf /etc/skel/.oh-my-bash
 fi
 git clone --depth=1 https://github.com/ohmybash/oh-my-bash.git /etc/skel/.oh-my-bash
 
-# Backup existing .bashrc in skel
-if [ -f "/etc/skel/.bashrc" ]; then
-    mv /etc/skel/.bashrc /etc/skel/.bashrc.fedora
-fi
-
-# Copy the template over as the new .bashrc
+# 2. Setup .bashrc from template
 cp /etc/skel/.oh-my-bash/templates/bashrc.osh-template /etc/skel/.bashrc
 
-# Modify .bashrc to source /etc/bashrc (Fedora default behavior)
-# This ensures system-wide settings are loaded
-echo "" >> /etc/skel/.bashrc
-echo "# Source global definitions" >> /etc/skel/.bashrc
-echo "if [ -f /etc/bashrc ]; then" >> /etc/skel/.bashrc
-echo "	. /etc/bashrc" >> /etc/skel/.bashrc
-echo "fi" >> /etc/skel/.bashrc
+# 3. Apply Customizations (Theme & Plugins)
+# Replace the default theme in the template
+sed -i "s/OSH_THEME=\"font\"/OSH_THEME=\"$OMB_THEME\"/" /etc/skel/.bashrc
 
+# 4. Append Fedora Defaults and Aesthetics
+# We preserve Fedora's global definitions and add user terminal preferences
+cat <<EOF >> /etc/skel/.bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# Visual Adjustments
 # Set cursor to underline (User request)
-# \e[4 q is the escape sequence for underline cursor
-echo "" >> /etc/skel/.bashrc
-echo "# Set cursor to underline" >> /etc/skel/.bashrc
-echo "printf '\e[4 q'" >> /etc/skel/.bashrc
+printf '\e[4 q'
+EOF
+
+echo "Oh My Bash installation configured successfully."
