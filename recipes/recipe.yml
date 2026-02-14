@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: fedora-kinoite-nitro-an515-43
-description: This is my personal OS image.
+description: Custom Fedora Kinoite (KDE Plasma Beta) optimized for the Acer Nitro 5 (AN515-43) with Nvidia, TLP, and LibreOffice.
 
 base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
@@ -13,33 +13,65 @@ modules:
         - "@kdesig/kde-beta"
     install:
       packages:
+        # KDE Plasma
         - plasma-firewall
-        - libreoffice-base
-        - libreoffice-calc
-        - libreoffice-draw
-        - libreoffice-emailmerge
-        - libreoffice-graphicfilter
-        - libreoffice-help-pt-BR
-        - libreoffice-impress
-        - libreoffice-kf6
-        - libreoffice-langpack-pt-BR
-        - libreoffice-math
-        - libreoffice-pyuno
-        - libreoffice-writer
         - plasma-login-manager
         - kcm-plasmalogin
+        - plasma-discover-rpm-ostree
+        # LibreOffice
+        - libreoffice-writer
+        - libreoffice-calc
+        - libreoffice-impress
+        - libreoffice-graphicfilter
+        - libreoffice-kf6
+        - libreoffice-langpack-pt-BR
     remove:
       packages:
+        # Browser
         - firefox
         - firefox-langpacks
-        - firewall-config
-        - kdebugsettings
-        - plasma-drkonqi
+        # Login Manager (replaced by Plasma Login)
         - sddm
         - sddm-kcm
         - sddm-wayland-plasma
+        # Debug Tools
+        - kdebugsettings
+        - plasma-drkonqi
+        - firewall-config
+        # Power Management (replaced by TLP)
         - tuned
         - tuned-ppd
+        # Input Method: fcitx5 (core)
+        - fcitx5
+        - fcitx5-autostart
+        - fcitx5-configtool
+        - fcitx5-data
+        - fcitx5-libs
+        - fcitx5-lua
+        - kcm-fcitx5
+        # Input Method: fcitx5 (GTK/Qt)
+        - fcitx5-gtk
+        - fcitx5-gtk3
+        - fcitx5-gtk4
+        - fcitx5-qt
+        - fcitx5-qt5
+        - fcitx5-qt6
+        - fcitx5-qt-libfcitx5qtdbus
+        - fcitx5-qt-libfcitx5qt6widgets
+        - fcitx5-qt-qt6gui
+        # Input Method: fcitx5 (language engines)
+        - fcitx5-chewing
+        - fcitx5-chinese-addons
+        - fcitx5-chinese-addons-data
+        - fcitx5-hangul
+        - fcitx5-libthai
+        - fcitx5-m17n
+        - fcitx5-mozc
+        - fcitx5-sayura
+        - fcitx5-unikey
+        # System Monitors
+        - htop
+        - nvtop
 
   - type: brew
 
@@ -53,22 +85,21 @@ modules:
 
   - type: script
     scripts:
-      - remove-flatpaks.sh
-      - setup-repos.sh
+      - upgrade-kde-beta.sh
       - setup-tlp.sh
-      - configure-nvidia.sh
 
   - type: dnf
     install:
       packages:
-        - libva-nvidia-driver # From RPM Fusion (setup-repos.sh)
         - tlp
         - tlp-pd
         - tlp-rdw
 
   - type: default-flatpaks
     configurations:
-      - repo:
+      - scope: system
+        notify: true
+        repo:
           url: https://dl.flathub.org/repo/flathub.flatpakrepo
           name: flathub
           title: Flathub
@@ -88,6 +119,7 @@ modules:
         - plasmalogin.service
         - tlp.service
         - tlp-pd.service
+        - rpm-ostreed-automatic.timer
       masked:
         - systemd-rfkill.service
         - systemd-rfkill.socket

@@ -8,59 +8,60 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ### 🎮 Base & Desktop Environment
 *   **Base:** `ghcr.io/ublue-os/kinoite-nvidia:43` (Fedora 43 Stable - Proprietary Nvidia drivers included).
-*   **KDE Plasma:** Beta Version (`@kdesig/kde-beta` enabled - Optional, keep to test Plasma latest features).
-*   **Login Manager:** **Plasma Login** (`plasmalogin.service`) replaces SDDM for a more integrated and lightweight experience (SDDM removed).
+*   **KDE Plasma:** Beta Version (`@kdesig/kde-beta` COPR enabled, all KDE packages upgraded via `dnf distro-sync`).
+*   **Login Manager:** **Plasma Login** (`plasmalogin.service`) replaces SDDM.
 
 ### ⚡ Power Optimizations
-*   **TLP:** Advanced power management configured and enabled by default.
-*   **Removed/Masked Services:** `tuned`, `tuned-ppd`, and `systemd-rfkill` were removed or masked to avoid conflicts with TLP.
+*   **TLP:** Advanced power management configured and enabled by default (replaces `tuned`/`tuned-ppd`).
+*   **Masked Services:** `systemd-rfkill` masked to avoid conflicts with TLP.
 
 ### 📦 Packages & Applications
 *   **Installed:**
-    *   Full **LibreOffice** suite (pt-BR support).
-    *   **Plasma Firewall**.
-*   **Removed (Bloatware/Redundancy):**
-    *   Firefox (RPM) - *Use the Flatpak version from Flathub*.
-    *   `sddm`, `sddm-kcm`, `sddm-wayland-plasma`.
-    *   `plasma-drkonqi`, `kdebugsettings`, `firewall-config`.
+    *   **LibreOffice** (Writer, Calc, Impress) with pt-BR support.
+    *   **Plasma Firewall**, **Plasma Discover** (rpm-ostree backend).
+*   **Removed (Bloatware):**
+    *   Firefox (RPM), `sddm`, `tuned`, `plasma-drkonqi`, `kdebugsettings`, `firewall-config`.
+    *   `fcitx5` (entire input method framework — 25 packages), `htop`, `nvtop`.
 
-### 🧹 Cleanup & Flatpaks
-*   All default Flatpaks from the base image are **removed** during installation.
-*   **Flathub** repository enabled and the following apps installed:
+### 🧹 Flatpaks
+*   **Flathub** (system scope) configured with:
     *   **Browser:** Google Chrome.
     *   **KDE Apps:** Okular, Elisa, Haruna, Skanpage, Kalk, Koko, Marknote.
-*   **Fedora Flatpaks** repository disabled.
+
+### 🔤 Fonts
+*   **Google Fonts:** Fira Sans, Fira Mono.
+*   **Nerd Fonts:** NerdFontsSymbolsOnly.
+
+### 🍺 Homebrew
+*   **Linuxbrew** enabled for post-installation package management.
 
 ## 📁 Project Structure
 
-*   **`recipes/recipe.yml`**: The core configuration file defining the image build process.
-*   **`files/scripts/`**: Directory containing custom shell scripts executed during the build.
-    *   `remove-flatpaks.sh`: Cleans default Flatpaks (Flathub is added via module).
-    *   `setup-repos.sh`: Installs RPM Fusion repositories.
-    *   `setup-tlp.sh`: Installs TLP repository.
-    *   `configure-nvidia.sh`: Configures Nvidia power settings.
+```
+recipes/
+└── recipe.yml              # Core BlueBuild recipe
+files/scripts/
+├── upgrade-kde-beta.sh     # Upgrades KDE packages from COPR
+└── setup-tlp.sh            # Installs TLP repository
+.github/workflows/
+├── build.yml               # Daily CI build + push/PR
+└── generate-iso.yml        # ISO generation + GitHub Release (auto after build)
+```
 
-## 🛠️ Configuration Details
+## 🛠️ Build Pipeline
 
-### 1. Base System
-*   **Image:** `ghcr.io/ublue-os/kinoite-nvidia:43` (Fedora 43 Stable).
-*   **Kernel:** Standard Fedora kernel with proprietary Nvidia drivers pre-loaded.
-*   **Desktop Environment:** KDE Plasma (Beta channel enabled via COPR).
+The `recipe.yml` defines the following modules, executed in order:
 
-### 2. Customizations Module (`recipe.yml`)
-*   **RPM Packages:**
-    *   **Installed:** `libreoffice-suite` (Full), `plasma-firewall`, `plasma-login-manager`, `kcm-plasmalogin`.
-    *   **Removed:** `firefox` (RPM), `sddm`, `tuned`, `plasma-drkonqi`, `kdebugsettings`.
-    *   **Fonts:**
-        *   **Module:** Fira Sans, Fira Mono (Google Fonts) and NerdFontsSymbolsOnly (Nerd Font).
-        *   **Local:** Fonts placed in `files/usr/share/fonts/ms-fonts` will also be installed.
-    *   **Flatpaks:** The `default-flatpaks` module configures **Flathub** as the system remote.
-    *   **Services:** The `systemd` module automatically enables `plasmalogin`, `tlp`, and masks conflicts.
-    1.  **`remove-flatpaks.sh`**: Removes pre-installed Flatpaks, cleans user data. (Flathub setup moved to module).
-    2.  **`setup-repos.sh`**: Installs RPM Fusion (Free/Nonfree) repositories.
-    3.  **`setup-tlp.sh`**: Installs TLP repository.
-    4.  **`configure-nvidia.sh`**: Sets `NVreg_DynamicPowerManagement=0x02`.
-    *   **Post-Script Packages:** An `rpm-ostree` module installs packages that depend on the repos above (`libva-nvidia-driver`, `tlp`, etc.).
+| # | Module | Description |
+|---|--------|-------------|
+| 1 | `dnf` | Add COPR `kde-beta`, install packages (LibreOffice, Plasma Login, Discover), remove bloatware + fcitx5 |
+| 2 | `brew` | Enable Homebrew/Linuxbrew |
+| 3 | `fonts` | Install Fira Sans, Fira Mono, NerdFontsSymbolsOnly |
+| 4 | `script` | `upgrade-kde-beta.sh`, `setup-tlp.sh` |
+| 5 | `dnf` | Install TLP packages (`tlp`, `tlp-pd`, `tlp-rdw`) |
+| 6 | `default-flatpaks` | Configure Flathub (system scope) and install Flatpak apps |
+| 7 | `systemd` | Enable services (`plasmalogin`, `tlp`, `rpm-ostreed-automatic.timer`), mask conflicts |
+| 8 | `signing` | Sign image with Cosign/Sigstore |
 
 ## 📥 Installation
 
@@ -78,12 +79,9 @@ To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
     systemctl reboot
     ```
 
-## 🧪 Testing & Verification (Without Installing)
+## 🧪 Testing & Verification
 
-You can test the image as a container before rebasing your main system.
-
-### 1. Simple CLI Check (Package Verification)
-Use `podman` to verify if packages and files exist:
+### 1. CLI Check (Package Verification)
 ```bash
 podman run --rm -it ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest /bin/bash
 # Inside the container:
@@ -93,20 +91,13 @@ exit
 ```
 
 ### 2. GUI Application Testing (Distrobox)
-To run graphical apps (like LibreOffice) from the image:
 ```bash
-# Create a test container
 distrobox create -i ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest -n nitro-test
-
-# Enter the container
 distrobox enter nitro-test
-
-# Run graphical apps (they will appear on your desktop)
 libreoffice --writer
 ```
 
 ### 3. Full System Test (Virtual Machine)
-To test boot, login manager (Plasma Login), and drivers:
 1.  Create a VM using **GNOME Boxes** or **Virt-Manager**.
 2.  Install a standard Fedora Kinoite image.
 3.  Run the rebase command inside the VM.
@@ -114,7 +105,7 @@ To test boot, login manager (Plasma Login), and drivers:
 
 ## 🔐 Verification
 
-The image is signed with Sigstore/Cosign. verify locally using `cosign.pub`:
+The image is signed with Sigstore/Cosign. Verify locally using `cosign.pub`:
 ```bash
 cosign verify --key cosign.pub ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43
 ```
