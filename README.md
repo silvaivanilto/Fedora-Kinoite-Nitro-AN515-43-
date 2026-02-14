@@ -14,7 +14,8 @@ This image is built on `ghcr.io/ublue-os/kinoite-nvidia:43` and heavily customiz
 *   **Login Manager:** **Plasma Login** (`plasmalogin.service`) replaces SDDM for a more integrated experience.
 
 ### 🔋 Power & Battery Health
-*   **TLP:** Advanced power management with specific **Acer Nitro 5 Battery Thresholds** (Start: 75% / Stop: 80%) to extend battery lifespan.
+*   **TLP:** Advanced power management with specific **Acer Nitro 5 Battery Thresholds** (Start: 75% / Stop: 80%).
+*   **TLP-PD:** TLP Power Profiles Daemon (v1.9+) enabled via official COPR for advanced profile switching directly in the recipe.
 *   **Nvidia Powerd:** Enabled for dynamic thermal and power balancing.
 *   **Radio Management:** `systemd-rfkill` masked to prevent conflicts with TLP's radio state management.
 

@@ -12,6 +12,7 @@ modules:
       copr:
         - "@kdesig/kde-beta"
         - jhyub/supergfxctl-plasmoid
+        - linrunner/tlp
         - lukenukem/asus-linux
     install:
       packages:

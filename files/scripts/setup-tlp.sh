@@ -3,11 +3,7 @@ set -ouex pipefail
 
 echo "Configuring TLP Power Management..."
 
-# 1. Install Upstream TLP Repo (Linrunner) for latest version
-# Using the official repo ensures better support for newer kernels and Ryzen CPUs.
-rpm-ostree install https://repo.linrunner.de/fedora/tlp/repos/releases/tlp-release.fc$(rpm -E %fedora).noarch.rpm
-
-# 2. Create Nitro 5 specific configuration
+# 1. Nitro 5 specific configuration
 # Setting battery thresholds to protect battery longevity (Gaming laptop best practice)
 mkdir -p /etc/tlp.d
 cat <<EOF > /etc/tlp.d/99-nitro-5.conf
