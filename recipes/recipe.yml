@@ -23,7 +23,6 @@ modules:
         # CachyOS Kernel (Requires Nvidia Driver Installation)
         - kernel-cachyos
         - kernel-cachyos-modules
-        - kernel-cachyos-modules-extra
         - kernel-cachyos-devel-matched
         # Nvidia Userspace (RPM Fusion)
         - akmod-nvidia
