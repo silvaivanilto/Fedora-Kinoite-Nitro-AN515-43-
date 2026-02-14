@@ -15,19 +15,26 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 *   **TLP:** Advanced power management configured and enabled by default (replaces `tuned`/`tuned-ppd`).
 *   **Masked Services:** `systemd-rfkill` masked to avoid conflicts with TLP.
 
+### 🖨️ Printing
+*   **Epson Drivers:** `epson-inkjet-printer-escpr` and `epson-inkjet-printer-escpr2` (installed from Fedora 41 — orphaned in Fedora 43).
+
 ### 📦 Packages & Applications
 *   **Installed:**
-    *   **LibreOffice** (Writer, Calc, Impress) with pt-BR support.
+    *   **LibreOffice** (Writer, Calc, Impress, Draw, Math) with pt-BR support.
     *   **Plasma Firewall**, **Plasma Discover** (rpm-ostree backend).
     *   **Distrobox** (replaces Toolbox for container management).
 *   **Removed (Bloatware):**
     *   Firefox (RPM), `sddm`, `tuned`, `plasma-drkonqi`, `kdebugsettings`, `firewall-config`.
-    *   `fcitx5` (entire input method framework — 25 packages), `toolbox`, `htop`, `nvtop`.
+    *   `fcitx5` (entire input method framework — 18 packages).
+    *   `ibus` engines for idiomas não utilizados (anthy, hangul, libpinyin, chewing, m17n).
+    *   `kate` (kwrite já incluso), `toolbox`, `htop`, `nvtop`, `mozilla-filesystem`.
 
 ### 🧹 Flatpaks
 *   **Flathub** (system scope) configured with:
     *   **Browser:** Google Chrome.
-    *   **KDE Apps:** Okular, Elisa, Haruna, Skanpage, Kalk, Koko, Marknote.
+    *   **KDE Apps:** Okular, Elisa, Haruna, Skanpage, Kalk, Koko, Marknote, Merkuro.
+    *   **Containers:** Kontainer.
+*   **User-scope Flathub** removed to avoid duplicates in Discover.
 
 ### 🔤 Fonts
 *   **Google Fonts:** Fira Sans, Fira Mono.
@@ -40,13 +47,14 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ```
 recipes/
-└── recipe.yml              # Core BlueBuild recipe
+└── recipe.yml                  # Core BlueBuild recipe
 files/scripts/
-├── upgrade-kde-beta.sh     # Upgrades KDE packages from COPR
-└── setup-tlp.sh            # Installs TLP repository
+├── upgrade-kde-beta.sh         # Upgrades KDE packages from COPR
+├── setup-tlp.sh                # Installs TLP repository
+└── install-epson-escpr.sh      # Installs Epson drivers from Fedora 41
 .github/workflows/
-├── build.yml               # Daily CI build + push/PR
-└── generate-iso.yml        # ISO generation + GitHub Release (auto after build)
+├── build.yml                   # Daily CI build + push/PR
+└── generate-iso.yml            # ISO generation + GitHub Release (auto after build)
 ```
 
 ## 🛠️ Build Pipeline
@@ -55,12 +63,12 @@ The `recipe.yml` defines the following modules, executed in order:
 
 | # | Module | Description |
 |---|--------|-------------|
-| 1 | `dnf` | Add COPR `kde-beta`, install packages (LibreOffice, Plasma Login, Discover, Distrobox), remove bloatware + fcitx5 + toolbox |
+| 1 | `dnf` | Add COPR `kde-beta`, install packages (LibreOffice, Plasma Login, Discover, Distrobox), remove bloatware + fcitx5 + ibus engines + kate + toolbox |
 | 2 | `brew` | Enable Homebrew/Linuxbrew |
 | 3 | `fonts` | Install Fira Sans, Fira Mono, NerdFontsSymbolsOnly |
-| 4 | `script` | `upgrade-kde-beta.sh`, `setup-tlp.sh` |
+| 4 | `script` | `upgrade-kde-beta.sh`, `setup-tlp.sh`, `install-epson-escpr.sh` |
 | 5 | `dnf` | Install TLP packages (`tlp`, `tlp-pd`, `tlp-rdw`) |
-| 6 | `default-flatpaks` | Configure Flathub (system scope) and install Flatpak apps |
+| 6 | `default-flatpaks` | Configure Flathub (system), install Flatpak apps, remove user-scope Flathub |
 | 7 | `systemd` | Enable services (`plasmalogin`, `tlp`, `rpm-ostreed-automatic.timer`), mask conflicts |
 | 8 | `signing` | Sign image with Cosign/Sigstore |
 
@@ -86,20 +94,13 @@ To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
 ```bash
 podman run --rm -it ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest /bin/bash
 # Inside the container:
-rpm -q libreoffice-writer distrobox  # Check if packages are installed
-rpm -q toolbox                       # Should NOT be found
-ls -l /etc/tlp.conf                  # Check if config file exists
+rpm -q libreoffice-writer libreoffice-draw distrobox  # Check if packages are installed
+rpm -q toolbox kate                                    # Should NOT be found
+ls -l /etc/tlp.conf                                    # Check if config file exists
 exit
 ```
 
-### 2. GUI Application Testing (Distrobox)
-```bash
-distrobox create -i ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest -n nitro-test
-distrobox enter nitro-test
-libreoffice --writer
-```
-
-### 3. Full System Test (Virtual Machine)
+### 2. Full System Test (Virtual Machine)
 1.  Create a VM using **GNOME Boxes** or **Virt-Manager**.
 2.  Install a standard Fedora Kinoite image.
 3.  Run the rebase command inside the VM.
@@ -110,4 +111,11 @@ libreoffice --writer
 The image is signed with Sigstore/Cosign. Verify locally using `cosign.pub`:
 ```bash
 cosign verify --key cosign.pub ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43
+```
+
+## 📀 ISO Download
+
+ISOs are generated automatically after each successful build and published as GitHub Releases. If the ISO exceeds 2 GB, it is split into parts. To reassemble:
+```bash
+cat fedora-kinoite-nitro-an515-43.iso.part_* > fedora-kinoite-nitro-an515-43.iso
 ```

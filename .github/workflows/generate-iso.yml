@@ -43,6 +43,22 @@ jobs:
             ./fedora-kinoite-nitro-an515-43.iso-CHECKSUM
           if-no-files-found: error
 
+      - name: Split ISO if larger than 2GB
+        run: |
+          FILE="fedora-kinoite-nitro-an515-43.iso"
+          MAX_SIZE=2000000000
+          FILE_SIZE=$(stat -c%s "$FILE")
+          echo "ISO size: $FILE_SIZE bytes"
+          if [ "$FILE_SIZE" -gt "$MAX_SIZE" ]; then
+            echo "ISO exceeds 2GB, splitting..."
+            split -b 1900M "$FILE" "${FILE}.part_"
+            rm "$FILE"
+            echo "SPLIT=true" >> $GITHUB_ENV
+          else
+            echo "ISO is under 2GB, no split needed."
+            echo "SPLIT=false" >> $GITHUB_ENV
+          fi
+
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
@@ -52,6 +68,12 @@ jobs:
             Automated ISO build from `${{ github.sha }}`.
 
             **Image:** `ghcr.io/${{ github.repository_owner }}/fedora-kinoite-nitro-an515-43:latest`
+
+            **To reassemble the ISO (if split into parts):**
+            ```
+            cat fedora-kinoite-nitro-an515-43.iso.part_* > fedora-kinoite-nitro-an515-43.iso
+            ```
           files: |
             fedora-kinoite-nitro-an515-43.iso
+            fedora-kinoite-nitro-an515-43.iso.part_*
             fedora-kinoite-nitro-an515-43.iso-CHECKSUM

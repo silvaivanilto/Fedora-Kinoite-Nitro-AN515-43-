@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: fedora-kinoite-nitro-an515-43
-description: Custom Fedora Kinoite (KDE Plasma Beta) optimized for the Acer Nitro 5 (AN515-43) with Nvidia, TLP, and LibreOffice.
+description: Custom Fedora Kinoite (KDE Plasma Beta) optimized for the Acer Nitro 5 (AN515-43) with Nvidia, TLP, LibreOffice, and Epson drivers.
 
 base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
@@ -22,6 +22,8 @@ modules:
         - libreoffice-writer
         - libreoffice-calc
         - libreoffice-impress
+        - libreoffice-draw
+        - libreoffice-math
         - libreoffice-graphicfilter
         - libreoffice-kf6
         - libreoffice-langpack-pt-BR
@@ -76,6 +78,21 @@ modules:
         # System Monitors
         - htop
         - nvtop
+        # Text Editor (kwrite is already included)
+        - kate
+        - kate-libs
+        - kate-plugins
+        - kate-krunner-plugin
+        # Input Method: ibus engines (unused languages)
+        - ibus-anthy
+        - ibus-anthy-python
+        - ibus-hangul
+        - ibus-libpinyin
+        - ibus-chewing
+        - ibus-m17n
+        - kasumi-unicode
+        # Firefox residual
+        - mozilla-filesystem
 
   - type: brew
 
@@ -91,6 +108,7 @@ modules:
     scripts:
       - upgrade-kde-beta.sh
       - setup-tlp.sh
+      - install-epson-escpr.sh
 
   - type: dnf
     install:
@@ -116,6 +134,13 @@ modules:
           - org.kde.kalk
           - org.kde.koko
           - org.kde.marknote
+          - io.github.DenysMb.Kontainer
+          - org.kde.merkuro
+      - scope: user
+        repo:
+          url: https://dl.flathub.org/repo/flathub.flatpakrepo
+          name: flathub
+        remove-repo: true
 
   - type: systemd
     system:
