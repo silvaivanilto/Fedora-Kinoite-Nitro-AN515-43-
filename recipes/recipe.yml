@@ -25,6 +25,8 @@ modules:
         - libreoffice-graphicfilter
         - libreoffice-kf6
         - libreoffice-langpack-pt-BR
+        # Container Management
+        - distrobox
     remove:
       packages:
         # Browser
@@ -69,6 +71,8 @@ modules:
         - fcitx5-mozc
         - fcitx5-sayura
         - fcitx5-unikey
+        # Container Management (replaced by distrobox)
+        - toolbox
         # System Monitors
         - htop
         - nvtop

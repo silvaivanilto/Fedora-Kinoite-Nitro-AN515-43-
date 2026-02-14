@@ -8,7 +8,7 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ### 🎮 Base & Desktop Environment
 *   **Base:** `ghcr.io/ublue-os/kinoite-nvidia:43` (Fedora 43 Stable - Proprietary Nvidia drivers included).
-*   **KDE Plasma:** Beta Version (`@kdesig/kde-beta` COPR enabled, all KDE packages upgraded via `dnf distro-sync`).
+*   **KDE Plasma:** Beta Version (`@kdesig/kde-beta` COPR enabled, packages upgraded via `dnf upgrade`).
 *   **Login Manager:** **Plasma Login** (`plasmalogin.service`) replaces SDDM.
 
 ### ⚡ Power Optimizations
@@ -19,9 +19,10 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 *   **Installed:**
     *   **LibreOffice** (Writer, Calc, Impress) with pt-BR support.
     *   **Plasma Firewall**, **Plasma Discover** (rpm-ostree backend).
+    *   **Distrobox** (replaces Toolbox for container management).
 *   **Removed (Bloatware):**
     *   Firefox (RPM), `sddm`, `tuned`, `plasma-drkonqi`, `kdebugsettings`, `firewall-config`.
-    *   `fcitx5` (entire input method framework — 25 packages), `htop`, `nvtop`.
+    *   `fcitx5` (entire input method framework — 25 packages), `toolbox`, `htop`, `nvtop`.
 
 ### 🧹 Flatpaks
 *   **Flathub** (system scope) configured with:
@@ -54,7 +55,7 @@ The `recipe.yml` defines the following modules, executed in order:
 
 | # | Module | Description |
 |---|--------|-------------|
-| 1 | `dnf` | Add COPR `kde-beta`, install packages (LibreOffice, Plasma Login, Discover), remove bloatware + fcitx5 |
+| 1 | `dnf` | Add COPR `kde-beta`, install packages (LibreOffice, Plasma Login, Discover, Distrobox), remove bloatware + fcitx5 + toolbox |
 | 2 | `brew` | Enable Homebrew/Linuxbrew |
 | 3 | `fonts` | Install Fira Sans, Fira Mono, NerdFontsSymbolsOnly |
 | 4 | `script` | `upgrade-kde-beta.sh`, `setup-tlp.sh` |
@@ -85,8 +86,9 @@ To rebase an existing Fedora Atomic (Silverblue/Kinoite) installation:
 ```bash
 podman run --rm -it ghcr.io/silvaivanilto/fedora-kinoite-nitro-an515-43:latest /bin/bash
 # Inside the container:
-rpm -q libreoffice-writer  # Check if package is installed
-ls -l /etc/tlp.conf        # Check if config file exists
+rpm -q libreoffice-writer distrobox  # Check if packages are installed
+rpm -q toolbox                       # Should NOT be found
+ls -l /etc/tlp.conf                  # Check if config file exists
 exit
 ```
 
