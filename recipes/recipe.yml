@@ -108,7 +108,9 @@ modules:
     scripts:
       - upgrade-kde-beta.sh
       - setup-tlp.sh
+      - setup-tlp.sh
       - install-epson-escpr.sh
+      - install-chrome.sh
 
   - type: dnf
     install:
@@ -126,7 +128,6 @@ modules:
           name: flathub
           title: Flathub
         install:
-          - com.google.Chrome
           - org.kde.okular
           - org.kde.elisa
           - org.kde.haruna

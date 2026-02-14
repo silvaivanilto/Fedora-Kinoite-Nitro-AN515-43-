@@ -20,6 +20,7 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ### 📦 Packages & Applications
 *   **Installed:**
+    *   **Google Chrome** (RPM) — Default Browser.
     *   **LibreOffice** (Writer, Calc, Impress, Draw, Math) with pt-BR support.
     *   **Plasma Firewall**, **Plasma Discover** (rpm-ostree backend).
     *   **Distrobox** (replaces Toolbox for container management).
@@ -31,7 +32,6 @@ This image is built on top of **Fedora Kinoite Nvidia (v43 Stable)** and include
 
 ### 🧹 Flatpaks
 *   **Flathub** (system scope) configured with:
-    *   **Browser:** Google Chrome.
     *   **KDE Apps:** Okular, Elisa, Haruna, Skanpage, Kalk, Koko, Marknote, Merkuro.
     *   **Containers:** Kontainer.
 *   **User-scope Flathub** removed to avoid duplicates in Discover.
