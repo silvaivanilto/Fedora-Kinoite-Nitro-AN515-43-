@@ -7,16 +7,8 @@ set -ouex pipefail
 
 echo "Configuring GRUB for Atomic/Kinoite environment..."
 
-# 1. Ensure the menu always appears (disable auto-hide)
-# This is critical for dual-booting so the menu isn't skipped.
-grub2-editenv - unset menu_auto_hide
-grub2-editenv - set menu_hide_delay=
-
-# 2. Set the GRUB timeout
-grub2-editenv - set boot_menu_timeout=5
-
-# 3. Enable 'saved' entry logic via environment
-grub2-editenv - set saved_entry=0
+# Note: We avoid grub2-editenv here because /boot is not accessible 
+# inside the build container. We focus on /etc/default/grub instead.
 
 # 4. Update /etc/default/grub WITHOUT touching kernel command line (GRUB_CMDLINE_LINUX)
 # These flags are necessary for os-prober and saving the default SO.
