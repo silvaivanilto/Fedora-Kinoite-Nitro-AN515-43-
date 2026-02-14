@@ -1,18 +1,41 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: fedora-kinoite-nitro-an515-43
-description: Custom Fedora Kinoite (KDE Plasma Beta) optimized for the Acer Nitro 5 (AN515-43) with Nvidia, TLP, LibreOffice, and Epson drivers.
+description: Custom Fedora Kinoite (CachyOS Kernel / Nvidia Open) optimized for the Acer Nitro 5 (AN515-43).
 
-base-image: ghcr.io/ublue-os/kinoite-nvidia
+base-image: ghcr.io/ublue-os/kinoite-main
 image-version: 43
 
 modules:
+  - type: rpm-ostree
+    install:
+      # RPM Fusion (Fedora 43 - Match image-version)
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
   - type: dnf
     repos:
       copr:
         - "@kdesig/kde-beta"
+        - "bieszczaders/kernel-cachyos"
+        - "bieszczaders/kernel-cachyos-addons"
     install:
       packages:
+        # CachyOS Kernel (Nvidia Open Support)
+        - kernel-cachyos
+        - kernel-cachyos-devel-matched
+        # Nvidia Userspace (RPM Fusion)
+        - akmod-nvidia
+        - nvidia-driver
+        - nvidia-settings
+        - nvidia-driver-cuda
+        - nvidia-driver-cuda-libs
+        # CachyOS Addons
+        - cachyos-settings
+        - cachyos-ksm-settings
+        - scx-scheds
+        - scx-manager
+        - scx-tools
+        - uksmd
         # KDE Plasma
         - plasma-firewall
         - plasma-login-manager
@@ -31,6 +54,8 @@ modules:
         - distrobox
     remove:
       packages:
+        # ZRAM (replaced by cachyos-settings)
+        - zram-generator-defaults
         # Browser
         - firefox
         - firefox-langpacks
@@ -42,9 +67,16 @@ modules:
         - kdebugsettings
         - plasma-drkonqi
         - firewall-config
+        # Kernel Replacement (Stock Fedora)
+        - kernel
+        - kernel-core
+        - kernel-modules
+        - kernel-modules-core
+        - kernel-modules-extra
         # Power Management (replaced by TLP)
         - tuned
         - tuned-ppd
+        - power-profiles-daemon
         # Input Method: fcitx5 (core)
         - fcitx5
         - fcitx5-autostart
@@ -108,9 +140,14 @@ modules:
     scripts:
       - upgrade-kde-beta.sh
       - setup-tlp.sh
-      - setup-tlp.sh
       - install-epson-escpr.sh
       - install-chrome.sh
+      - install-oh-my-bash.sh
+      - setup-root-theme-sync.sh
+      - configure-grub.sh
+      - configure-nvidia.sh
+      - fix-selinux-cachyos.sh
+      - set-cachyos-default.sh
 
   - type: dnf
     install:
