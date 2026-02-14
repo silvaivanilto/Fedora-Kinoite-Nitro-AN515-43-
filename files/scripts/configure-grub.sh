@@ -1,59 +1,52 @@
 #!/bin/bash
 set -ouex pipefail
 
-# Configure GRUB for Dual Boot (Windows detection) and Save Last Boot.
-# On Fedora Atomic (Kinoite), /etc/default/grub might not exist or be empty.
-# We create/append to it, but the user MUST run grub2-mkconfig manually later.
+# Modern GRUB configuration for Fedora Atomic (Kinoite)
+# Focus: Ensure dual-boot visibility and remember last boot using grub2-editenv.
+
+echo "Configuring GRUB for Atomic/Kinoite environment..."
+
+# 1. Ensure the menu always appears (disable auto-hide)
+# This is critical for dual-booting so the menu isn't skipped.
+grub2-editenv - unset menu_auto_hide
+grub2-editenv - set menu_hide_delay=
+
+# 2. Set the GRUB timeout (in case it was hidden or too short)
+# Using kargs as a secondary way to ensure visibility if the config allows.
+# However, grub2-editenv is more direct for the menu behavior.
+grub2-editenv - set boot_menu_timeout=5
+
+# 3. Enable 'saved' entry logic
+# This makes GRUB look at the 'saved_entry' variable in the environment.
+grub2-editenv - set saved_entry=0
+# Note: For this to work automatically (SAVEDEFAULT), the grub.cfg must support it.
+# We still keep the /etc/default/grub flags as a template for when the user
+# eventually runs grub2-mkconfig on the target system.
 
 GRUB_FILE="/etc/default/grub"
-
-# Create file if it doesn't exist (it usually does in the image build context, 
-# but might be missing in some minimal base images)
-if [ ! -f "$GRUB_FILE" ]; then
-    echo "Creating $GRUB_FILE..."
-    touch "$GRUB_FILE"
-    echo "GRUB_TIMEOUT=5" >> "$GRUB_FILE"
-    echo "GRUB_DISTRIBUTOR=\"$(sed 's, release .*$,,g' /etc/system-release)\"" >> "$GRUB_FILE"
-    echo "GRUB_DEFAULT=saved" >> "$GRUB_FILE"
-    echo "GRUB_DISABLE_SUBMENU=true" >> "$GRUB_FILE"
-    echo "GRUB_TERMINAL_OUTPUT=\"console\"" >> "$GRUB_FILE"
-    echo "GRUB_CMDLINE_LINUX=\"rhgb quiet\"" >> "$GRUB_FILE"
-    echo "GRUB_DISABLE_RECOVERY=\"true\"" >> "$GRUB_FILE"
-    echo "GRUB_ENABLE_BLSCFG=true" >> "$GRUB_FILE"
-fi
-
-# 0. Ensure boot is quiet (hide text) - append rhgb quiet if missing
-if grep -q "GRUB_CMDLINE_LINUX" "$GRUB_FILE"; then
-    if ! grep -q "rhgb" "$GRUB_FILE"; then
-        sed -i 's/^GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="\1 rhgb"/' "$GRUB_FILE"
-    fi
-    if ! grep -q "quiet" "$GRUB_FILE"; then
-        sed -i 's/^GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="\1 quiet"/' "$GRUB_FILE"
-    fi
-    if ! grep -q "rd.udev.log_priority=3" "$GRUB_FILE"; then
-        sed -i 's/^GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="\1 rd.udev.log_priority=3"/' "$GRUB_FILE"
-    fi
+if [ -f "$GRUB_FILE" ]; then
+    echo "Updating $GRUB_FILE for potential future mkconfig runs..."
+    
+    # Enable os-prober for Dual Boot detection
+    sed -i 's/^GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=false/' "$GRUB_FILE" || echo "GRUB_DISABLE_OS_PROBER=false" >> "$GRUB_FILE"
+    
+    # Enable saving the last selected OS
+    sed -i 's/^GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=true/' "$GRUB_FILE" || echo "GRUB_SAVEDEFAULT=true" >> "$GRUB_FILE"
+    
+    # Ensure default is set to 'saved'
+    sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' "$GRUB_FILE" || echo "GRUB_DEFAULT=saved" >> "$GRUB_FILE"
 else
-    echo "GRUB_CMDLINE_LINUX=\"rhgb quiet rd.udev.log_priority=3\"" >> "$GRUB_FILE"
+    # Minimal template if missing
+    cat <<EOF > "$GRUB_FILE"
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="\$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=true
+GRUB_DISABLE_OS_PROBER=false
+GRUB_TERMINAL_OUTPUT="console"
+GRUB_CMDLINE_LINUX="rhgb quiet rd.udev.log_priority=3"
+GRUB_ENABLE_BLSCFG=true
+EOF
 fi
 
-# 1. Enable os-prober
-if grep -q "GRUB_DISABLE_OS_PROBER" "$GRUB_FILE"; then
-    sed -i 's/^GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=false/' "$GRUB_FILE"
-else
-    echo "GRUB_DISABLE_OS_PROBER=false" >> "$GRUB_FILE"
-fi
-
-# 2. Enable saving the last selected OS
-if grep -q "GRUB_SAVEDEFAULT" "$GRUB_FILE"; then
-    sed -i 's/^GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=true/' "$GRUB_FILE"
-else
-    echo "GRUB_SAVEDEFAULT=true" >> "$GRUB_FILE"
-fi
-
-# 3. Ensure default is set to 'saved'
-if grep -q "GRUB_DEFAULT" "$GRUB_FILE"; then
-    sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' "$GRUB_FILE"
-else
-    echo "GRUB_DEFAULT=saved" >> "$GRUB_FILE"
-fi
+echo "GRUB configuration applied via grub2-editenv and template update."
