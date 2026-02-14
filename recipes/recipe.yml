@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: fedora-kinoite-nitro-an515-43
-description: Custom Fedora Kinoite (CachyOS Kernel / Nvidia Open) optimized for the Acer Nitro 5 (AN515-43).
+description: Custom Fedora Kinoite (Fedora 43 / KDE Plasma Master / Nvidia) optimized for the Acer Nitro 5 (AN515-43). Bleeding Edge Edition.
 
 base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
@@ -13,87 +13,92 @@ modules:
         - "@kdesig/kde-beta"
     install:
       packages:
-        # KDE Plasma
-        - plasma-firewall
-        - plasma-login-manager
-        - kcm-plasmalogin
-        - plasma-discover-rpm-ostree
-        # LibreOffice
-        - libreoffice-writer
-        - libreoffice-calc
-        - libreoffice-impress
-        - libreoffice-draw
-        - libreoffice-math
-        - libreoffice-graphicfilter
-        - libreoffice-kf6
-        - libreoffice-langpack-pt-BR
         # Container Management
         - distrobox
+        # KDE Plasma
+        - kcm-plasmalogin
+        - plasma-discover-rpm-ostree
+        - plasma-firewall
+        - plasma-login-manager
+        # LibreOffice
+        - libreoffice-calc
+        - libreoffice-draw
+        - libreoffice-graphicfilter
+        - libreoffice-impress
+        - libreoffice-kf6
+        - libreoffice-langpack-pt-BR
+        - libreoffice-math
+        - libreoffice-writer
+        # Power Management
+        - tlp
+        - tlp-pd
+        - tlp-rdw
     remove:
       packages:
-        # Browser
+        # Browser (replaced by Chrome)
         - firefox
         - firefox-langpacks
-        # Login Manager (replaced by Plasma Login)
-        - sddm
-        - sddm-kcm
-        - sddm-wayland-plasma
-        # Debug Tools
+        - mozilla-filesystem
+        # Container Management (replaced by distrobox)
+        - toolbox
+        # Debug & System Tools
+        - firewall-config
         - kdebugsettings
         - plasma-drkonqi
-        - firewall-config
-        # Power Management (replaced by TLP)
-        - tuned
-        - tuned-ppd
-        - power-profiles-daemon
-        # Input Method: fcitx5 (core)
+        # Input Method: fcitx5 (core & engines)
         - fcitx5
         - fcitx5-autostart
-        - fcitx5-configtool
-        - fcitx5-data
-        - fcitx5-libs
-        - fcitx5-lua
-        - kcm-fcitx5
-        # Input Method: fcitx5 (GTK/Qt)
-        - fcitx5-gtk
-        - fcitx5-gtk3
-        - fcitx5-gtk4
-        - fcitx5-qt
-        - fcitx5-qt5
-        - fcitx5-qt6
-        - fcitx5-qt-libfcitx5qtdbus
-        - fcitx5-qt-libfcitx5qt6widgets
-        - fcitx5-qt-qt6gui
-        # Input Method: fcitx5 (language engines)
         - fcitx5-chewing
         - fcitx5-chinese-addons
         - fcitx5-chinese-addons-data
+        - fcitx5-configtool
+        - fcitx5-data
+        - fcitx5-gtk
+        - fcitx5-gtk3
+        - fcitx5-gtk4
         - fcitx5-hangul
+        - fcitx5-libs
         - fcitx5-libthai
+        - fcitx5-lua
         - fcitx5-m17n
         - fcitx5-mozc
+        - fcitx5-qt
+        - fcitx5-qt-libfcitx5qt6widgets
+        - fcitx5-qt-libfcitx5qtdbus
+        - fcitx5-qt-qt6gui
+        - fcitx5-qt5
+        - fcitx5-qt6
         - fcitx5-sayura
         - fcitx5-unikey
-        # Container Management (replaced by distrobox)
-        - toolbox
+        - kcm-fcitx5
+        - libchewing
+        - libime
+        - libime-data
+        # Input Method: ibus (engines)
+        - ibus-anthy
+        - ibus-anthy-python
+        - ibus-chewing
+        - ibus-hangul
+        - ibus-libpinyin
+        - ibus-m17n
+        - kasumi-common
+        - kasumi-unicode
+        # Login Manager (replaced by Plasma Login)
+        - sddm
+        - sddm-breeze
+        - sddm-kcm
+        - sddm-wayland-plasma
+        # Power Management (replaced by TLP)
+        - tuned
+        - tuned-ppd
         # System Monitors
         - htop
         - nvtop
-        # Text Editor (kwrite is already included)
+        # Text Editor (KWrite is already included)
         - kate
+        - kate-krunner-plugin
         - kate-libs
         - kate-plugins
-        - kate-krunner-plugin
-        # Input Method: ibus engines (unused languages)
-        - ibus-anthy
-        - ibus-anthy-python
-        - ibus-hangul
-        - ibus-libpinyin
-        - ibus-chewing
-        - ibus-m17n
-        - kasumi-unicode
-        # Firefox residual
-        - mozilla-filesystem
 
   - type: brew
 
@@ -115,13 +120,6 @@ modules:
       - setup-root-theme-sync.sh
       - configure-grub.sh
       - configure-nvidia.sh
-
-  - type: dnf
-    install:
-      packages:
-        - tlp
-        - tlp-pd
-        - tlp-rdw
 
   - type: default-flatpaks
     configurations:
