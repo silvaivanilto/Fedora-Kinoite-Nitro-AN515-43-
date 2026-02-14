@@ -8,11 +8,15 @@ image-version: 43
 
 modules:
   - type: dnf
+    install:
+      packages:
+        - /tmp/files/rpms/tlp-release.fc43.noarch.rpm
+
+  - type: dnf
     repos:
       copr:
         - "@kdesig/kde-beta"
         - jhyub/supergfxctl-plasmoid
-        - linrunner/tlp
         - lukenukem/asus-linux
     install:
       packages:
