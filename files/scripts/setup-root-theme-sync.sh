@@ -7,20 +7,27 @@ echo "Configuring Root Theme Synchronization Service..."
 # This ensures that apps run as root share the same visual theme and settings.
 cat <<EOF > /etc/systemd/system/root-theme-sync.service
 [Unit]
-Description=Sync root KDE theme with UID 1000
+Description=Sync root KDE theme with primary admin user
 After=local-fs.target
-# Only run if the primary user's home directory exists
-ConditionPathExists=/home/$(getent passwd 1000 | cut -d: -f1)
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c ' \
-    U_HOME=\$(getent passwd 1000 | cut -d: -f6); \
-    if [ -n "\$U_HOME" ]; then \
-        mkdir -p /root/.config; \
-        ln -sf "\$U_HOME/.config/kdeglobals" /root/.config/kdeglobals; \
-        ln -sf "\$U_HOME/.config/katerc" /root/.config/katerc; \
-        ln -sf "\$U_HOME/.config/kcminputrc" /root/.config/kcminputrc; \
+ExecStart=/bin/bash -c ' \\
+    # Find the first non-root user in the wheel group
+    TARGET_USER=\$(getent group wheel | cut -d: -f4 | tr "," "\n" | grep -v "^root$" | head -n1); \\
+    if [ -n "\$TARGET_USER" ]; then \\
+        U_HOME=\$(getent passwd "\$TARGET_USER" | cut -d: -f6); \\
+        if [ -n "\$U_HOME" ] && [ -d "\$U_HOME/.config" ]; then \\
+            echo "Syncing root theme with user: \$TARGET_USER (\$U_HOME)"; \\
+            mkdir -p /root/.config; \\
+            ln -sf "\$U_HOME/.config/kdeglobals" /root/.config/kdeglobals; \\
+            ln -sf "\$U_HOME/.config/katerc" /root/.config/katerc; \\
+            ln -sf "\$U_HOME/.config/kcminputrc" /root/.config/kcminputrc; \\
+        else \\
+             echo "User config not found for \$TARGET_USER"; \\
+        fi \\
+    else \\
+        echo "No suitable user found for theme sync."; \\
     fi'
 
 [Install]

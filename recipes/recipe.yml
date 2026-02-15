@@ -25,7 +25,7 @@ modules:
         # Hybrid Graphics
         - supergfxctl
         - supergfxctl-plasmoid
-        # KDE Plasma
+        # KDE Plasma - Login Manager (Install FIRST to satisfy dependencies)
         - kcm-plasmalogin
         - plasma-discover-rpm-ostree
         - plasma-firewall
@@ -43,6 +43,9 @@ modules:
         - tlp
         - tlp-pd
         - tlp-rdw
+
+  # Module 2: Safe Removals (Executed after installation)
+  - type: dnf
     remove:
       packages:
         # Browser (replaced by Chrome)
